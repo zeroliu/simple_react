@@ -4,7 +4,8 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "server": "live-server ."
+    "server": "live-server dist",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/zeroliu/simple_react/issues"
   },
-  "homepage": "https://github.com/zeroliu/simple_react#readme"
+  "homepage": "https://github.com/zeroliu/simple_react#readme",
+  "dependencies": {
+    "typescript": "^3.7.5"
+  }
 }
