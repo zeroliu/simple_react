@@ -14,6 +14,9 @@ import * as Didact from './didact.js';
 // const a = createElement('a', undefined, 'bar');
 // const b = createElement('b');
 // const element = createElement('div', undefined, a, b);
-const element = Didact.createElement("div", { id: 'foo' });
-console.log(element);
+const element = (Didact.createElement("div", { id: 'foo' },
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null)));
+const container = document.getElementById('root');
+Didact.render(element, container);
 //# sourceMappingURL=main.js.map

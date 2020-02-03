@@ -12,4 +12,18 @@ export function createElement(type, props, ...children) {
 function createTextElement(text) {
     return createElement('TEXT_ELEMENT', { nodeValue: text });
 }
+export function render(element, container) {
+    const node = element.type === 'TEXT_ELEMENT'
+        ? document.createTextNode('')
+        : document.createElement(element.type);
+    Object.keys(element.props)
+        .filter(key => key !== 'children')
+        .forEach(key => {
+        node[key] = element.props[key];
+    });
+    element.props.children.forEach(child => {
+        render(child, node);
+    });
+    container.appendChild(node);
+}
 //# sourceMappingURL=didact.js.map
