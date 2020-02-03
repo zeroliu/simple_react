@@ -1,0 +1,19 @@
+{
+  "name": "simple_react",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "server": "live-server ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeroliu/simple_react.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zeroliu/simple_react/issues"
+  },
+  "homepage": "https://github.com/zeroliu/simple_react#readme"
+}
