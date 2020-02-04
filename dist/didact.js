@@ -26,4 +26,17 @@ export function render(element, container) {
     });
     container.appendChild(node);
 }
+let nextUnitOfWork = null;
+function workLoop(deadline) {
+    let shouldYield = false;
+    while (!shouldYield && nextUnitOfWork) {
+        nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+        shouldYield = deadline.timeRemaining() < 1;
+    }
+    window.requestIdleCallback(workLoop);
+}
+function performUnitOfWork(unitOfWork) {
+    return unitOfWork;
+}
+window.requestIdleCallback(workLoop);
 //# sourceMappingURL=didact.js.map

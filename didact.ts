@@ -53,3 +53,19 @@ export function render(element: DidactElement, container: HTMLElement | Text) {
   });
   container.appendChild(node);
 }
+
+let nextUnitOfWork: any = null;
+function workLoop(deadline: RequestIdleCallbackDeadline) {
+  let shouldYield = false;
+  while (!shouldYield && nextUnitOfWork) {
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    shouldYield = deadline.timeRemaining() < 1;
+  }
+  window.requestIdleCallback(workLoop);
+}
+
+function performUnitOfWork<T>(unitOfWork: T): T {
+  return unitOfWork;
+}
+
+window.requestIdleCallback(workLoop);
