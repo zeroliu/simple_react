@@ -13,34 +13,45 @@ function createTextElement(text) {
     return createElement('TEXT_ELEMENT', { nodeValue: text });
 }
 export function render(element, container) {
-    nextUnitOfWork = {
+    wipRoot = {
         node: container,
         props: {
             children: [element],
         },
     };
-    // element.props.children.forEach(child => {
-    //   render(child, node);
-    // });
-    // container.appendChild(node);
+    nextUnitOfWork = wipRoot;
 }
-let nextUnitOfWork;
+let nextUnitOfWork = null;
+let wipRoot = null;
 function workLoop(deadline) {
     let shouldYield = false;
     while (!shouldYield && nextUnitOfWork) {
         nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
         shouldYield = deadline.timeRemaining() < 1;
     }
+    if (!nextUnitOfWork && wipRoot) {
+        commitRoot();
+    }
     window.requestIdleCallback(workLoop);
 }
+function commitRoot() {
+    commitFiber(wipRoot);
+    wipRoot = null;
+}
+function commitFiber(fiber) {
+    var _a, _b;
+    if (!((_a = fiber) === null || _a === void 0 ? void 0 : _a.node))
+        return;
+    if ((_b = fiber.parent) === null || _b === void 0 ? void 0 : _b.node) {
+        fiber.parent.node.appendChild(fiber.node);
+    }
+    commitFiber(fiber.child);
+    commitFiber(fiber.sibling);
+}
 function performUnitOfWork(fiber) {
-    var _a;
     // Add DOM node
     if (!fiber.node) {
         fiber.node = createDom(fiber);
-    }
-    if ((_a = fiber.parent) === null || _a === void 0 ? void 0 : _a.node) {
-        fiber.parent.node.appendChild(fiber.node);
     }
     // Create new fibers
     let prevSibling;
@@ -69,7 +80,7 @@ function performUnitOfWork(fiber) {
         }
         nextFiber = nextFiber.parent;
     }
-    return;
+    return null;
 }
 function createDom(fiber) {
     if (!fiber.type) {
