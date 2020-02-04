@@ -21,6 +21,24 @@ const element = (
   <div id='foo'>
     <a>bar</a>
     <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
+    <a>bar</a>
+    <b></b>
   </div>
 );
 const container = document.getElementById('root')!;

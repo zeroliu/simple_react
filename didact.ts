@@ -13,6 +13,15 @@ interface DidactElement {
   props: ElementProps;
 }
 
+interface Fiber {
+  type?: string;
+  node?: HTMLElement | Text;
+  props: ElementProps;
+  parent?: Fiber;
+  sibling?: Fiber;
+  child?: Fiber;
+}
+
 export function createElement(
   type: string,
   props?: InputProps,
@@ -37,24 +46,20 @@ function createTextElement(text: string | number) {
 }
 
 export function render(element: DidactElement, container: HTMLElement | Text) {
-  const node =
-    element.type === 'TEXT_ELEMENT'
-      ? document.createTextNode('')
-      : document.createElement(element.type);
+  nextUnitOfWork = {
+    node: container,
+    props: {
+      children: [element],
+    },
+  };
 
-  Object.keys(element.props)
-    .filter(key => key !== 'children')
-    .forEach(key => {
-      (node as Record<string, any>)[key] = element.props[key];
-    });
-
-  element.props.children.forEach(child => {
-    render(child, node);
-  });
-  container.appendChild(node);
+  // element.props.children.forEach(child => {
+  //   render(child, node);
+  // });
+  // container.appendChild(node);
 }
 
-let nextUnitOfWork: any = null;
+let nextUnitOfWork: Fiber | undefined;
 function workLoop(deadline: RequestIdleCallbackDeadline) {
   let shouldYield = false;
   while (!shouldYield && nextUnitOfWork) {
@@ -64,8 +69,63 @@ function workLoop(deadline: RequestIdleCallbackDeadline) {
   window.requestIdleCallback(workLoop);
 }
 
-function performUnitOfWork<T>(unitOfWork: T): T {
-  return unitOfWork;
+function performUnitOfWork(fiber: Fiber): Fiber | undefined {
+  // Add DOM node
+  if (!fiber.node) {
+    fiber.node = createDom(fiber);
+  }
+
+  if (fiber.parent?.node) {
+    fiber.parent.node.appendChild(fiber.node);
+  }
+
+  // Create new fibers
+  let prevSibling: Fiber | undefined;
+  fiber.props.children.forEach((element, index) => {
+    const newFiber: Fiber = {
+      type: element.type,
+      props: element.props,
+      parent: fiber,
+    };
+    if (prevSibling) {
+      prevSibling.sibling = newFiber;
+    }
+    if (index === 0) {
+      fiber.child = newFiber;
+    }
+    prevSibling = newFiber;
+  });
+
+  // Return next unit of work
+  if (fiber.child) {
+    return fiber.child;
+  }
+
+  let nextFiber: Fiber | undefined = fiber;
+  while (nextFiber) {
+    if (nextFiber.sibling) {
+      return nextFiber.sibling;
+    }
+    nextFiber = nextFiber.parent;
+  }
+
+  return;
+}
+
+function createDom(fiber: Fiber) {
+  if (!fiber.type) {
+    throw new Error(`Attempting to create a DOM from a fiber without type.`);
+  }
+  const node =
+    fiber.type === 'TEXT_ELEMENT'
+      ? document.createTextNode('')
+      : document.createElement(fiber.type);
+  Object.keys(fiber.props)
+    .filter(key => key !== 'children')
+    .forEach(key => {
+      (node as Record<string, any>)[key] = fiber.props[key];
+    });
+  return node;
 }
 
 window.requestIdleCallback(workLoop);

@@ -16,6 +16,24 @@ import * as Didact from './didact.js';
 // const element = createElement('div', undefined, a, b);
 const element = (Didact.createElement("div", { id: 'foo' },
     Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
+    Didact.createElement("b", null),
+    Didact.createElement("a", null, "bar"),
     Didact.createElement("b", null)));
 const container = document.getElementById('root');
 Didact.render(element, container);
