@@ -14,7 +14,7 @@ interface DidactElement {
 }
 
 interface Fiber {
-  type?: string;
+  type?: string | Function;
   node?: HTMLElement | Text;
   props: ElementProps;
   parent?: Fiber;
@@ -84,19 +84,36 @@ function commitRoot() {
   wipRoot = null;
 }
 
+function commitDeletion(fiber?: Fiber, parent?: HTMLElement | Text) {
+  if (fiber?.node) {
+    parent?.removeChild(fiber.node);
+  } else {
+    commitDeletion(fiber?.child, parent);
+  }
+}
+
 function commitFiber(fiber?: Fiber | null) {
-  if (!fiber?.node) return;
-  const domParent = fiber.parent?.node;
+  if (!fiber) {
+    return;
+  }
+
+  let domParentFiber = fiber.parent;
+  while (domParentFiber && !domParentFiber?.node) {
+    domParentFiber = domParentFiber?.parent;
+  }
+  const domParent = domParentFiber?.node;
+
   if (domParent) {
     if (fiber.effectTag === 'PLACEMENT' && fiber.node) {
       domParent.appendChild(fiber.node);
     } else if (fiber.effectTag === 'DELETION') {
-      domParent.removeChild(fiber.node);
+      commitDeletion(fiber, domParent);
     } else if (fiber.effectTag === 'UPDATE' && fiber.node) {
       // update dom
       updateDOM(fiber.node, fiber.alternate?.props!, fiber.props);
     }
   }
+
   commitFiber(fiber.child);
   commitFiber(fiber.sibling);
 }
@@ -146,15 +163,28 @@ function updateDOM(
     });
 }
 
-function performUnitOfWork(fiber: Fiber): Fiber | null {
-  // Add DOM node
+function updateFunctionComponent(fiber: Fiber) {
+  if (!(fiber.type instanceof Function)) {
+    throw new Error('Attempting to update a non function component.');
+  }
+  const children = [fiber.type(fiber.props)];
+  reconsileChildren(fiber, children);
+}
+
+function updateHostComponent(fiber: Fiber) {
   if (!fiber.node) {
     fiber.node = createDom(fiber);
   }
+  reconsileChildren(fiber, fiber.props.children);
+}
 
-  // Create new fibers
-  const elements = fiber.props.children;
-  reconsileChildren(fiber, elements);
+function performUnitOfWork(fiber: Fiber): Fiber | null {
+  const isFunctionComponent = fiber.type instanceof Function;
+  if (isFunctionComponent) {
+    updateFunctionComponent(fiber);
+  } else {
+    updateHostComponent(fiber);
+  }
 
   // Return next unit of work
   if (fiber.child) {
@@ -174,7 +204,12 @@ function performUnitOfWork(fiber: Fiber): Fiber | null {
 
 function createDom(fiber: Fiber) {
   if (!fiber.type) {
-    throw new Error(`Attempting to create a DOM from a fiber without type.`);
+    throw new Error('Attempting to create a DOM from a fiber without type.');
+  }
+  if (fiber.type instanceof Function) {
+    throw new Error(
+      'Attempting to create a DOM form a fiber with function type.',
+    );
   }
   const node =
     fiber.type === 'TEXT_ELEMENT'

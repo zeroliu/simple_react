@@ -45,21 +45,35 @@ function commitRoot() {
     currentRoot = wipRoot;
     wipRoot = null;
 }
-function commitFiber(fiber) {
+function commitDeletion(fiber, parent) {
     var _a, _b, _c;
-    if (!((_a = fiber) === null || _a === void 0 ? void 0 : _a.node))
+    if ((_a = fiber) === null || _a === void 0 ? void 0 : _a.node) {
+        (_b = parent) === null || _b === void 0 ? void 0 : _b.removeChild(fiber.node);
+    }
+    else {
+        commitDeletion((_c = fiber) === null || _c === void 0 ? void 0 : _c.child, parent);
+    }
+}
+function commitFiber(fiber) {
+    var _a, _b, _c, _d;
+    if (!fiber) {
         return;
-    const domParent = (_b = fiber.parent) === null || _b === void 0 ? void 0 : _b.node;
+    }
+    let domParentFiber = fiber.parent;
+    while (domParentFiber && !((_a = domParentFiber) === null || _a === void 0 ? void 0 : _a.node)) {
+        domParentFiber = (_b = domParentFiber) === null || _b === void 0 ? void 0 : _b.parent;
+    }
+    const domParent = (_c = domParentFiber) === null || _c === void 0 ? void 0 : _c.node;
     if (domParent) {
         if (fiber.effectTag === 'PLACEMENT' && fiber.node) {
             domParent.appendChild(fiber.node);
         }
         else if (fiber.effectTag === 'DELETION') {
-            domParent.removeChild(fiber.node);
+            commitDeletion(fiber, domParent);
         }
         else if (fiber.effectTag === 'UPDATE' && fiber.node) {
             // update dom
-            updateDOM(fiber.node, (_c = fiber.alternate) === null || _c === void 0 ? void 0 : _c.props, fiber.props);
+            updateDOM(fiber.node, (_d = fiber.alternate) === null || _d === void 0 ? void 0 : _d.props, fiber.props);
         }
     }
     commitFiber(fiber.child);
@@ -101,14 +115,27 @@ function updateDOM(dom, prevProps, nextProps) {
         dom.addEventListener(eventType, nextProps[name]);
     });
 }
-function performUnitOfWork(fiber) {
-    // Add DOM node
+function updateFunctionComponent(fiber) {
+    if (!(fiber.type instanceof Function)) {
+        throw new Error('Attempting to update a non function component.');
+    }
+    const children = [fiber.type(fiber.props)];
+    reconsileChildren(fiber, children);
+}
+function updateHostComponent(fiber) {
     if (!fiber.node) {
         fiber.node = createDom(fiber);
     }
-    // Create new fibers
-    const elements = fiber.props.children;
-    reconsileChildren(fiber, elements);
+    reconsileChildren(fiber, fiber.props.children);
+}
+function performUnitOfWork(fiber) {
+    const isFunctionComponent = fiber.type instanceof Function;
+    if (isFunctionComponent) {
+        updateFunctionComponent(fiber);
+    }
+    else {
+        updateHostComponent(fiber);
+    }
     // Return next unit of work
     if (fiber.child) {
         return fiber.child;
@@ -124,7 +151,10 @@ function performUnitOfWork(fiber) {
 }
 function createDom(fiber) {
     if (!fiber.type) {
-        throw new Error(`Attempting to create a DOM from a fiber without type.`);
+        throw new Error('Attempting to create a DOM from a fiber without type.');
+    }
+    if (fiber.type instanceof Function) {
+        throw new Error('Attempting to create a DOM form a fiber with function type.');
     }
     const node = fiber.type === 'TEXT_ELEMENT'
         ? document.createTextNode('')

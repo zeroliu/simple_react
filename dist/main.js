@@ -11,8 +11,11 @@
 //   React.createElement('b'),
 // );
 import * as Didact from './didact.js';
-const createElement = (value) => Didact.createElement("div", { id: 'foo' }, value);
+// const createElement = (value: string) => <div id='foo'>{value}</div>;
 const container = document.getElementById('root');
-Didact.render(createElement('hello'), container);
-setTimeout(() => Didact.render(createElement('world'), container), 1000);
+// Didact.render(createElement('hello'), container);
+function App(props) {
+    return Didact.createElement("h1", { name: props.name }, "Hi");
+}
+Didact.render(Didact.createElement(App, { name: 'foo' }), container);
 //# sourceMappingURL=main.js.map

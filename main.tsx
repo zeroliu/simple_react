@@ -14,7 +14,12 @@
 
 import * as Didact from './didact.js';
 
-const createElement = (value: string) => <div id='foo'>{value}</div>;
+// const createElement = (value: string) => <div id='foo'>{value}</div>;
 const container = document.getElementById('root')!;
-Didact.render(createElement('hello'), container);
-setTimeout(() => Didact.render(createElement('world'), container), 1000);
+// Didact.render(createElement('hello'), container);
+
+function App(props: { name: string }) {
+  return <h1 name={props.name}>Hi</h1>;
+}
+
+Didact.render(<App name='foo'></App>, container);
