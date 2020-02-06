@@ -11,30 +11,8 @@
 //   React.createElement('b'),
 // );
 import * as Didact from './didact.js';
-// const a = createElement('a', undefined, 'bar');
-// const b = createElement('b');
-// const element = createElement('div', undefined, a, b);
-const element = (Didact.createElement("div", { id: 'foo' },
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null),
-    Didact.createElement("a", null, "bar"),
-    Didact.createElement("b", null)));
+const createElement = (value) => Didact.createElement("div", { id: 'foo' }, value);
 const container = document.getElementById('root');
-Didact.render(element, container);
+Didact.render(createElement('hello'), container);
+setTimeout(() => Didact.render(createElement('world'), container), 1000);
 //# sourceMappingURL=main.js.map

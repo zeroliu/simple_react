@@ -14,32 +14,7 @@
 
 import * as Didact from './didact.js';
 
-// const a = createElement('a', undefined, 'bar');
-// const b = createElement('b');
-// const element = createElement('div', undefined, a, b);
-const element = (
-  <div id='foo'>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-    <a>bar</a>
-    <b></b>
-  </div>
-);
+const createElement = (value: string) => <div id='foo'>{value}</div>;
 const container = document.getElementById('root')!;
-Didact.render(element, container);
+Didact.render(createElement('hello'), container);
+setTimeout(() => Didact.render(createElement('world'), container), 1000);
